@@ -102,12 +102,12 @@ object TargetReference : PolyReferenceResolver(), MixinReference {
         return targets.flatMap { AtResolver(at, it.clazz, it.method).resolveNavigationTargets() }.toTypedArray()
     }
 
-    override fun resolveReference(context: PsiElement): Array<ResolveResult> {
+    public override fun resolveReference(context: PsiElement): Array<ResolveResult> {
         val result = resolveTarget(context) ?: return ResolveResult.EMPTY_ARRAY
         return arrayOf(PsiElementResolveResult(result))
     }
 
-    override fun collectVariants(context: PsiElement): Array<Any> {
+    public override fun collectVariants(context: PsiElement): Array<Any> {
         val at = context.parentOfType<PsiAnnotation>() ?: return ArrayUtilRt.EMPTY_OBJECT_ARRAY
         val targets = getTargets(at, false) ?: return ArrayUtilRt.EMPTY_OBJECT_ARRAY
         return targets.flatMap { target ->

@@ -42,6 +42,7 @@ object MixinConstants {
         const val MIXIN_CONFIG = "org.spongepowered.asm.mixin.transformer.MixinConfig"
         const val MIXIN_PLUGIN = "org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin"
         const val TARGET_SELECTOR_DYNAMIC = "org.spongepowered.asm.mixin.injection.selectors.ITargetSelectorDynamic"
+        const val TARGET_SELECTOR = "org.spongepowered.asm.mixin.injection.selectors.TargetSelector"
         const val SELECTOR_ID = "org.spongepowered.asm.mixin.injection.selectors.ITargetSelectorDynamic.SelectorId"
         const val SHIFT = "org.spongepowered.asm.mixin.injection.At.Shift"
 
@@ -84,6 +85,10 @@ object MixinConstants {
 
     object MixinExtras {
         const val OPERATION = "com.llamalad7.mixinextras.injector.wrapoperation.Operation"
+        const val MODIFY_EXPRESSION_VALUE = "com.llamalad7.mixinextras.injector.ModifyExpressionValue"
+        const val MODIFY_RECEIVER = "com.llamalad7.mixinextras.injector.ModifyReceiver"
+        const val MODIFY_RETURN_VALUE = "com.llamalad7.mixinextras.injector.ModifyReturnValue"
+        const val WRAP_WITH_CONDITION = "com.llamalad7.mixinextras.injector.WrapWithCondition"
         const val WRAP_OPERATION = "com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation"
         const val LOCAL = "com.llamalad7.mixinextras.sugar.Local"
         const val LOCAL_REF_PACKAGE = "com.llamalad7.mixinextras.sugar.ref."
@@ -108,5 +113,9 @@ object MixinConstants {
                 else -> this
             }
         }
+    }
+
+    object MixinSquared {
+        const val TARGET_HANDLER = "com.bawnorton.mixinsquared.TargetHandler"
     }
 }
