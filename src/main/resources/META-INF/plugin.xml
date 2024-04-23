@@ -128,6 +128,7 @@
         <mixinSelectorParser id="memberReference" implementation="com.demonwav.mcdev.platform.mixin.reference.MixinMemberParser" />
         <mixinSelectorParser implementation="com.demonwav.mcdev.platform.mixin.handlers.injectionPoint.NewInsnSelectorParser" order="before memberReference" />
         <mixinSelectorParser implementation="com.demonwav.mcdev.platform.mixin.reference.DescSelectorParser" />
+        <mixinSelectorParser implementation="com.demonwav.mcdev.platform.mixin.reference.TargetHandlerSelectorParser"/>
 
         <mixinAnnotationHandler annotation="org.spongepowered.asm.mixin.Overwrite" implementation="com.demonwav.mcdev.platform.mixin.handlers.OverwriteHandler" />
         <mixinAnnotationHandler annotation="org.spongepowered.asm.mixin.Shadow" implementation="com.demonwav.mcdev.platform.mixin.handlers.ShadowHandler" />
@@ -432,6 +433,8 @@
         <lang.foldingBuilder language="JAVA" implementationClass="com.demonwav.mcdev.platform.mixin.folding.MixinObjectCastFoldingBuilder"/>
         <lang.foldingBuilder language="JAVA" implementationClass="com.demonwav.mcdev.platform.mixin.folding.MixinTargetDescriptorFoldingBuilder"/>
         <lang.foldingBuilder language="JAVA" implementationClass="com.demonwav.mcdev.platform.mixin.folding.AccessorMixinFoldingBuilder"/>
+        <lang.foldingBuilder language="JAVA"
+                             implementationClass="com.demonwav.mcdev.platform.mixin.folding.MixinTargetHandlerMixinFoldingBuilder"/>
 
         <implicitUsageProvider implementation="com.demonwav.mcdev.platform.mixin.insight.MixinImplicitUsageProvider"/>
         <deadCode implementation="com.demonwav.mcdev.platform.mixin.insight.MixinEntryPoint"/>
@@ -454,7 +457,9 @@
         <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.MethodGTDHandler" order="first"/>
         <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.DescGTDHandler" order="first"/>
         <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.target.TargetGTDHandler" order="first"/>
-        <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.selector.MSSelectorGTDHandler" order="first"/>
+        <gotoDeclarationHandler
+            implementation="com.demonwav.mcdev.platform.mixin.reference.selector.TargetHandlerGTDHandler"
+            order="first"/>
         <completion.confidence language="JAVA" implementationClass="com.demonwav.mcdev.platform.mixin.completion.MixinCompletionConfidence"
                                order="before javaSkipAutopopupInStrings"/>
         <weigher key="completion" implementationClass="com.demonwav.mcdev.platform.mixin.completion.MixinCompletionWeigher" id="mcdev.mixin" order="first"/>
@@ -1078,13 +1083,30 @@
 
         <!--region Mixin Squared -->
         <localInspection displayName="Unresolved target handler mixin reference"
-                         shortname="UnresolvedTargetHandlerMixinReference"
+                         shortName="UnresolvedTargetHandlerMixinReference"
                          groupName="Mixin"
                          language="JAVA"
                          enabledByDefault="true"
                          level="ERROR"
                          hasStaticDescription="true"
                          implementationClass="com.demonwav.mcdev.platform.mixin.inspection.mixinsquared.UnresolvedTargetHandlerMixinInspection"/>
+        <localInspection displayName="Unresolved target handler name reference"
+                         shortName="UnresolvedTargetHandlerNameReference"
+                         groupName="Mixin"
+                         language="JAVA"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         hasStaticDescription="true"
+                         implementationClass="com.demonwav.mcdev.platform.mixin.inspection.mixinsquared.UnresolvedTargetHandlerNameInspection"/>
+        <localInspection displayName="Invalid target handler prefix"
+                         shortName="InvalidTargetHandlerPrefix"
+                         groupName="Mixin"
+                         language="JAVA"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         hasStaticDescription="true"
+                         implementationClass="com.demonwav.mcdev.platform.mixin.inspection.mixinsquared.InvalidTargetHandlerPrefixInspection"/>
+        <!--endregion-->
 
         <!--region Configuration -->
         <localInspection displayName="Unresolved config reference"

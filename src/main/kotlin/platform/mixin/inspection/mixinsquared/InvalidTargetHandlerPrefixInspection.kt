@@ -23,12 +23,15 @@ package com.demonwav.mcdev.platform.mixin.inspection.mixinsquared
 import com.demonwav.mcdev.platform.mixin.handlers.injectionPoint.TargetHandlerResolver
 import com.demonwav.mcdev.platform.mixin.inspection.MixinInspection
 import com.demonwav.mcdev.platform.mixin.util.MixinConstants
+import com.demonwav.mcdev.platform.mixin.util.getSimpleAnnotationName
+import com.demonwav.mcdev.platform.mixin.util.isPrefix
+import com.demonwav.mcdev.util.constantStringValue
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.JavaElementVisitor
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElementVisitor
 
-class UnresolvedTargetHandlerMixinInspection : MixinInspection() {
+class InvalidTargetHandlerPrefixInspection : MixinInspection() {
     override fun getStaticDescription() = "Reports unresolved mixin references in TargetHandler annotations"
 
     override fun buildVisitor(holder: ProblemsHolder): PsiElementVisitor = object : JavaElementVisitor() {
@@ -37,14 +40,24 @@ class UnresolvedTargetHandlerMixinInspection : MixinInspection() {
                 return
             }
 
-            val target = TargetHandlerResolver(targetHandlerAnnotation).resolveMixinTarget()
-            val attribute = targetHandlerAnnotation.findDeclaredAttributeValue("mixin")
-            if (target == null) {
-                holder.registerProblem(
-                    attribute ?: targetHandlerAnnotation.nameReferenceElement ?: targetHandlerAnnotation,
-                    "Cannot resolve mixin target"
-                )
+            val attribute = targetHandlerAnnotation.findDeclaredAttributeValue("prefix") ?: return
+            val prefix = attribute.constantStringValue ?: return
+            if (isPrefix(prefix)) {
+                val annotations = TargetHandlerResolver(targetHandlerAnnotation).resolvePrefixTargets(prefix)
+                if (annotations.isNullOrEmpty()) {
+                    val simpleName = getSimpleAnnotationName(prefix)
+                    holder.registerProblem(
+                        attribute,
+                        "Could not find any '$simpleName' annotations"
+                    )
+                }
+                return
             }
+
+            holder.registerProblem(
+                attribute,
+                "Invalid prefix"
+            )
         }
     }
 }

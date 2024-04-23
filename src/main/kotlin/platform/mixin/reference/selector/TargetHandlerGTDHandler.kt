@@ -26,7 +26,7 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiLiteral
 import com.intellij.psi.util.parentOfType
 
-class MSSelectorGTDHandler : GotoDeclarationHandler {
+class TargetHandlerGTDHandler : GotoDeclarationHandler {
     override fun getGotoDeclarationTargets(
         sourceElement: PsiElement?,
         offset: Int,
@@ -34,9 +34,15 @@ class MSSelectorGTDHandler : GotoDeclarationHandler {
     ): Array<PsiElement>? {
         if (sourceElement == null) return null
         val stringLiteral = sourceElement.parentOfType<PsiLiteral>() ?: return null
-        if (!MSSelectorReference.ELEMENT_PATTERN.accepts(stringLiteral)) {
-            return null
+        if (TargetHandlerMixinReference.ELEMENT_PATTERN.accepts(stringLiteral)) {
+            return TargetHandlerMixinReference.resolveNavigationTargets(stringLiteral)
         }
-        return MSSelectorReference.resolveNavigationTargets(stringLiteral)
+        if (TargetHandlerNameReference.ELEMENT_PATTERN.accepts(stringLiteral)) {
+            return TargetHandlerNameReference.resolveNavigationTargets(stringLiteral)
+        }
+        if (TargetHandlerPrefixReference.ELEMENT_PATTERN.accepts(stringLiteral)) {
+            return TargetHandlerPrefixReference.resolveNavigationTargets(stringLiteral)
+        }
+        return null
     }
 }

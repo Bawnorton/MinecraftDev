@@ -56,5 +56,10 @@ class MixinFoldingOptionsProvider :
             { settings.state.foldAccessorMethodCalls },
             { b -> settings.state.foldAccessorMethodCalls = b },
         )
+        checkBox(
+            "Target handler mixin",
+            { settings.state.foldTargetHandlerMixin },
+            { b -> settings.state.foldTargetHandlerMixin = b },
+        )
     }
 }

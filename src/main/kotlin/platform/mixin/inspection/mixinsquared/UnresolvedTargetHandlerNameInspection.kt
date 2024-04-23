@@ -28,7 +28,7 @@ import com.intellij.psi.JavaElementVisitor
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiElementVisitor
 
-class UnresolvedTargetHandlerMixinInspection : MixinInspection() {
+class UnresolvedTargetHandlerNameInspection : MixinInspection() {
     override fun getStaticDescription() = "Reports unresolved mixin references in TargetHandler annotations"
 
     override fun buildVisitor(holder: ProblemsHolder): PsiElementVisitor = object : JavaElementVisitor() {
@@ -37,12 +37,14 @@ class UnresolvedTargetHandlerMixinInspection : MixinInspection() {
                 return
             }
 
-            val target = TargetHandlerResolver(targetHandlerAnnotation).resolveMixinTarget()
-            val attribute = targetHandlerAnnotation.findDeclaredAttributeValue("mixin")
-            if (target == null) {
+            val resolver = TargetHandlerResolver(targetHandlerAnnotation)
+            val target = resolver.resolveMixinTarget() ?: return
+            val targetMethods = resolver.resolveNameTargets(target)
+            val attribute = targetHandlerAnnotation.findDeclaredAttributeValue("name")
+            if (targetMethods.isNullOrEmpty()) {
                 holder.registerProblem(
                     attribute ?: targetHandlerAnnotation.nameReferenceElement ?: targetHandlerAnnotation,
-                    "Cannot resolve mixin target"
+                    "Cannot resolve name target"
                 )
             }
         }
