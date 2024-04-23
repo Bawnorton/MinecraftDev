@@ -454,6 +454,7 @@
         <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.MethodGTDHandler" order="first"/>
         <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.DescGTDHandler" order="first"/>
         <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.target.TargetGTDHandler" order="first"/>
+        <gotoDeclarationHandler implementation="com.demonwav.mcdev.platform.mixin.reference.selector.MSSelectorGTDHandler" order="first"/>
         <completion.confidence language="JAVA" implementationClass="com.demonwav.mcdev.platform.mixin.completion.MixinCompletionConfidence"
                                order="before javaSkipAutopopupInStrings"/>
         <weigher key="completion" implementationClass="com.demonwav.mcdev.platform.mixin.completion.MixinCompletionWeigher" id="mcdev.mixin" order="first"/>
@@ -1074,6 +1075,16 @@
                          hasStaticDescription="true"
                          implementationClass="com.demonwav.mcdev.platform.mixin.inspection.mixinextras.LocalArgsOnlyInspection"/>
         <!--endregion-->
+
+        <!--region Mixin Squared -->
+        <localInspection displayName="Unresolved target handler mixin reference"
+                         shortname="UnresolvedTargetHandlerMixinReference"
+                         groupName="Mixin"
+                         language="JAVA"
+                         enabledByDefault="true"
+                         level="ERROR"
+                         hasStaticDescription="true"
+                         implementationClass="com.demonwav.mcdev.platform.mixin.inspection.mixinsquared.UnresolvedTargetHandlerMixinInspection"/>
 
         <!--region Configuration -->
         <localInspection displayName="Unresolved config reference"

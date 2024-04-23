@@ -42,6 +42,7 @@ object MixinConstants {
         const val MIXIN_CONFIG = "org.spongepowered.asm.mixin.transformer.MixinConfig"
         const val MIXIN_PLUGIN = "org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin"
         const val TARGET_SELECTOR_DYNAMIC = "org.spongepowered.asm.mixin.injection.selectors.ITargetSelectorDynamic"
+        const val TARGET_SELECTOR = "org.spongepowered.asm.mixin.injection.selectors.TargetSelector"
         const val SELECTOR_ID = "org.spongepowered.asm.mixin.injection.selectors.ITargetSelectorDynamic.SelectorId"
         const val SHIFT = "org.spongepowered.asm.mixin.injection.At.Shift"
 
@@ -108,5 +109,9 @@ object MixinConstants {
                 else -> this
             }
         }
+    }
+
+    object MixinSquared {
+        const val TARGET_HANDLER = "com.bawnorton.mixinsquared.TargetHandler"
     }
 }
