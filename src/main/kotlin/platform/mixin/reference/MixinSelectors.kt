@@ -52,6 +52,7 @@ import com.intellij.openapi.util.text.StringUtil
 import com.intellij.psi.CommonClassNames
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiAnnotation
+import com.intellij.psi.PsiCallExpression
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiField
@@ -61,6 +62,7 @@ import com.intellij.psi.PsiNameValuePair
 import com.intellij.psi.PsiTypes
 import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.psi.search.searches.AnnotatedMembersSearch
+import com.intellij.psi.search.searches.MethodReferencesSearch
 import com.intellij.psi.util.InheritanceUtil
 import com.intellij.psi.util.PsiModificationTracker
 import com.intellij.psi.util.PsiTreeUtil
@@ -388,6 +390,25 @@ private class MixinRegexSelector(
 // Dynamic selectors
 
 /**
+ * A dynamic selector can change which class to query for members if desired.
+ */
+interface DynamicMixinSelector : MixinSelector {
+    fun redirectOwner(owner: ClassNode): ClassNode {
+        return owner
+    }
+
+    companion object {
+        fun apply(selector: MixinSelector?, owner: ClassNode): ClassNode {
+            return if (selector is DynamicMixinSelector) {
+                selector.redirectOwner(owner)
+            } else {
+                owner
+            }
+        }
+    }
+}
+
+/**
  * Checks if the string uses a dynamic selector that exists in the project but has no special handling
  * in mcdev, used to suppress invalid selector errors.
  */
@@ -417,19 +438,56 @@ private fun getAllDynamicSelectors(project: Project): Set<String> {
             val annotation = member.findAnnotation(MixinConstants.Classes.SELECTOR_ID) ?: return@flatMap emptySequence()
             val value = annotation.findAttributeValue("value")?.constantStringValue
                 ?: return@flatMap emptySequence()
-            val namespace = annotation.findAttributeValue("namespace")?.constantStringValue
+            var namespace = annotation.findAttributeValue("namespace")?.constantStringValue
             if (namespace.isNullOrEmpty()) {
                 val builtinPrefix = "org.spongepowered.asm.mixin.injection.selectors."
                 if (member.qualifiedName?.startsWith(builtinPrefix) == true) {
                     sequenceOf(value, "mixin:$value")
                 } else {
-                    sequenceOf(value)
+                    namespace = findNamespace(project, member)
+                    if (namespace != null) {
+                        sequenceOf("$namespace:$value")
+                    } else {
+                        sequenceOf(value)
+                    }
                 }
             } else {
                 sequenceOf("$namespace:$value")
             }
         }.toSet()
     }
+}
+
+/**
+ * Dynamic selectors don't have to declare their namespace in the annotation,
+ * so instead we look for the registration call and extract the namespace from there.
+ */
+private fun findNamespace(
+    project: Project,
+    member: PsiClass
+): String? {
+    val targetSelector = JavaPsiFacade.getInstance(project)
+        .findClass(MixinConstants.Classes.TARGET_SELECTOR, GlobalSearchScope.allScope(project))
+    val registerMethod = targetSelector?.findMethodsByName("register", false)?.firstOrNull() ?: return null
+
+    val query = MethodReferencesSearch.search(registerMethod)
+    val usages = query.findAll()
+    for (usage in usages) {
+        val element = usage.element
+        val callExpression = PsiTreeUtil.getParentOfType(element, PsiCallExpression::class.java) ?: continue
+        val args = callExpression.argumentList ?: continue
+        if (args.expressions.size != 2) continue
+
+        // is the registered selector the one we're checking?
+        val selectorName = args.expressions[0].text.removeSuffix(".class")
+        if (selectorName != member.name) continue
+
+        val namespaceArg = args.expressions[1].text.removeSurrounding("\"")
+        if (namespaceArg.isEmpty()) continue
+
+        return namespaceArg
+    }
+    return null
 }
 
 private val DYNAMIC_SELECTOR_PATTERN = "(?i)^@([a-z]+(:[a-z]+)?)(\\((.*)\\))?$".toRegex()
@@ -446,13 +504,13 @@ abstract class DynamicSelectorParser(id: String, vararg aliases: String) : Mixin
         return parseDynamic(matchResult.groups[4]?.value ?: "", context)
     }
 
-    abstract fun parseDynamic(args: String, context: PsiElement): MixinSelector?
+    abstract fun parseDynamic(args: String, context: PsiElement): DynamicMixinSelector?
 }
 
 // @Desc
 
 class DescSelectorParser : DynamicSelectorParser("Desc", "mixin:Desc") {
-    override fun parseDynamic(args: String, context: PsiElement): MixinSelector? {
+    override fun parseDynamic(args: String, context: PsiElement): DynamicMixinSelector? {
         val descAnnotation = findDescAnnotation(args.lowercase(Locale.ENGLISH), context) ?: return null
         return descSelectorFromAnnotation(descAnnotation)
     }
@@ -593,7 +651,7 @@ data class DescSelector(
     val owners: Set<String>,
     val name: String,
     override val methodDescriptor: String,
-) : MixinSelector {
+) : DynamicMixinSelector {
     override fun matchField(owner: String, name: String, desc: String): Boolean {
         return this.owners.contains(owner) && this.name == name && this.fieldDescriptor.substringBefore("(") == desc
     }
