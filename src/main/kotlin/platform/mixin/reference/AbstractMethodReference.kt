@@ -84,7 +84,7 @@ abstract class AbstractMethodReference : PolyReferenceResolver(), MixinReference
         val targetMethodInfo = parseSelector(stringValue, context) ?: return false
         val targets = getTargets(context) ?: return false
         return !targets.asSequence().flatMap {
-            DynamicMixinSelector.apply(targetMethodInfo, it).findMethods(targetMethodInfo)
+            targetMethodInfo.getCustomOwner(it).findMethods(targetMethodInfo)
         }.any()
     }
 
@@ -128,7 +128,7 @@ abstract class AbstractMethodReference : PolyReferenceResolver(), MixinReference
     ): Sequence<ClassAndMethodNode> {
         return targets.asSequence()
             .flatMap { target ->
-                val actualTarget = DynamicMixinSelector.apply(selector, target)
+                val actualTarget = selector.getCustomOwner(target)
                 actualTarget.findMethods(selector).map { ClassAndMethodNode(actualTarget, it) }
             }
     }

@@ -25,7 +25,6 @@ import com.demonwav.mcdev.platform.mixin.handlers.injectionPoint.CollectVisitor
 import com.demonwav.mcdev.platform.mixin.handlers.injectionPoint.InsnResolutionInfo
 import com.demonwav.mcdev.platform.mixin.inspection.injector.MethodSignature
 import com.demonwav.mcdev.platform.mixin.reference.DescSelectorParser
-import com.demonwav.mcdev.platform.mixin.reference.DynamicMixinSelector
 import com.demonwav.mcdev.platform.mixin.reference.isMiscDynamicSelector
 import com.demonwav.mcdev.platform.mixin.reference.parseMixinSelector
 import com.demonwav.mcdev.platform.mixin.util.ClassAndMethodNode
@@ -62,7 +61,7 @@ abstract class InjectorAnnotationHandler : MixinAnnotationHandler {
             desc.mapNotNull { DescSelectorParser.descSelectorFromAnnotation(it) }
 
         val targetClassMethods = selectors.associateWith { selector ->
-            val actualTarget = DynamicMixinSelector.apply(selector, targetClass)
+            val actualTarget = selector.getCustomOwner(targetClass)
             (actualTarget to actualTarget.methods)
         }
 

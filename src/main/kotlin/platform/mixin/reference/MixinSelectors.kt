@@ -125,6 +125,10 @@ interface MixinSelector {
         return matchMethod(qualifier.name, method.name, method.desc)
     }
 
+    fun getCustomOwner(owner: ClassNode): ClassNode {
+        return owner
+    }
+
     /**
      * Implement this to return false for early-out optimizations, so you don't need to resolve the member in the
      * navigation visitor
@@ -390,25 +394,6 @@ private class MixinRegexSelector(
 // Dynamic selectors
 
 /**
- * A dynamic selector can change which class to query for members if desired.
- */
-interface DynamicMixinSelector : MixinSelector {
-    fun redirectOwner(owner: ClassNode): ClassNode {
-        return owner
-    }
-
-    companion object {
-        fun apply(selector: MixinSelector?, owner: ClassNode): ClassNode {
-            return if (selector is DynamicMixinSelector) {
-                selector.redirectOwner(owner)
-            } else {
-                owner
-            }
-        }
-    }
-}
-
-/**
  * Checks if the string uses a dynamic selector that exists in the project but has no special handling
  * in mcdev, used to suppress invalid selector errors.
  */
@@ -504,13 +489,13 @@ abstract class DynamicSelectorParser(id: String, vararg aliases: String) : Mixin
         return parseDynamic(matchResult.groups[4]?.value ?: "", context)
     }
 
-    abstract fun parseDynamic(args: String, context: PsiElement): DynamicMixinSelector?
+    abstract fun parseDynamic(args: String, context: PsiElement): MixinSelector?
 }
 
 // @Desc
 
 class DescSelectorParser : DynamicSelectorParser("Desc", "mixin:Desc") {
-    override fun parseDynamic(args: String, context: PsiElement): DynamicMixinSelector? {
+    override fun parseDynamic(args: String, context: PsiElement): MixinSelector? {
         val descAnnotation = findDescAnnotation(args.lowercase(Locale.ENGLISH), context) ?: return null
         return descSelectorFromAnnotation(descAnnotation)
     }
@@ -651,7 +636,7 @@ data class DescSelector(
     val owners: Set<String>,
     val name: String,
     override val methodDescriptor: String,
-) : DynamicMixinSelector {
+) : MixinSelector {
     override fun matchField(owner: String, name: String, desc: String): Boolean {
         return this.owners.contains(owner) && this.name == name && this.fieldDescriptor.substringBefore("(") == desc
     }

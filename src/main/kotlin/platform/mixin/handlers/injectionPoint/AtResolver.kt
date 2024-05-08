@@ -20,7 +20,6 @@
 
 package com.demonwav.mcdev.platform.mixin.handlers.injectionPoint
 
-import com.demonwav.mcdev.platform.mixin.reference.DynamicMixinSelector
 import com.demonwav.mcdev.platform.mixin.reference.MixinSelector
 import com.demonwav.mcdev.platform.mixin.reference.isMiscDynamicSelector
 import com.demonwav.mcdev.platform.mixin.reference.parseMixinSelector
@@ -240,7 +239,7 @@ class AtResolver(
     }
 
     private fun getTargetClass(selector: MixinSelector?): ClassNode {
-        return DynamicMixinSelector.apply(selector, targetClass)
+        return selector?.getCustomOwner(targetClass) ?: targetClass
     }
 }
 
