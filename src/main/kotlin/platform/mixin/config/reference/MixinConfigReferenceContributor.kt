@@ -33,7 +33,6 @@ import com.intellij.psi.PsiReferenceRegistrar
 
 class MixinConfigReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
-        println(this::class.qualifiedName)
         val jsonPattern = PlatformPatterns.psiElement(JsonStringLiteral::class.java)
             .inFile(PlatformPatterns.psiFile().withFileType(StandardPatterns.`object`(MixinConfigFileType.Json)))
         val json5Pattern = PlatformPatterns.psiElement(JsonStringLiteral::class.java)
