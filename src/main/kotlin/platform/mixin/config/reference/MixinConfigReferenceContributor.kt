@@ -26,23 +26,20 @@ import com.demonwav.mcdev.util.isPropertyValue
 import com.intellij.json.psi.JsonArray
 import com.intellij.json.psi.JsonStringLiteral
 import com.intellij.patterns.PlatformPatterns
-import com.intellij.patterns.PsiElementPattern
 import com.intellij.patterns.StandardPatterns
 import com.intellij.psi.PsiReferenceContributor
 import com.intellij.psi.PsiReferenceRegistrar
 
 class MixinConfigReferenceContributor : PsiReferenceContributor() {
     override fun registerReferenceProviders(registrar: PsiReferenceRegistrar) {
-        val jsonPattern = PlatformPatterns.psiElement(JsonStringLiteral::class.java)
-            .inFile(PlatformPatterns.psiFile().withFileType(StandardPatterns.`object`(MixinConfigFileType.Json)))
-        val json5Pattern = PlatformPatterns.psiElement(JsonStringLiteral::class.java)
-            .inFile(PlatformPatterns.psiFile().withFileType(StandardPatterns.`object`(MixinConfigFileType.Json5)))
+        val anyMixinConfigFileType = StandardPatterns.or(
+            StandardPatterns.`object`(MixinConfigFileType.Json),
+            StandardPatterns.`object`(MixinConfigFileType.Json5)
+        )
 
-        registerWithPattern(registrar, jsonPattern)
-        registerWithPattern(registrar, json5Pattern)
-    }
+        val pattern = PlatformPatterns.psiElement(JsonStringLiteral::class.java)
+            .inFile(PlatformPatterns.psiFile().withFileType(anyMixinConfigFileType))
 
-    private fun registerWithPattern(registrar: PsiReferenceRegistrar, pattern: PsiElementPattern.Capture<JsonStringLiteral>) {
         registrar.registerReferenceProvider(pattern.isPropertyKey(), ConfigProperty)
         registrar.registerReferenceProvider(pattern.isPropertyValue("package"), MixinPackage)
         registrar.registerReferenceProvider(pattern.isPropertyValue("plugin"), MixinPlugin)
