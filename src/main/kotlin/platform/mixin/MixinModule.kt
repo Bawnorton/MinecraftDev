@@ -37,8 +37,6 @@ import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiManager
 import com.intellij.psi.search.FileTypeIndex
 import com.intellij.psi.search.GlobalSearchScope
-import de.marhali.json5.Json5
-import de.marhali.json5.Json5Options
 import javax.swing.Icon
 
 class MixinModule(facet: MinecraftFacet) : AbstractModule(facet) {
